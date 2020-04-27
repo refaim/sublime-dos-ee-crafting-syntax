@@ -7,7 +7,7 @@ scope: source.dos-ee-crafting
 
 variables:
   entity: '(category|object)'
-  transform_code: '(Boost2|BoostBoth|Destroy1|Destroy1Boost2|Destroy1Transform2|Destroy1Transform2Boost2|Destroy2Transform1|Destroy2Transform1Boost1|DestroyBoth|DoNothing|Transform1|Transform1Boost1|Transform1Boost2|Transform1CreateNew|Transform2|Transform2Boost2|TransformBoth|TransformBothBoost1|TransformBothBoostBoth|TransformBothCreateAndBoostNew|TransformBothCreateNew)'
+  identifier: '[a-zA-Z0-9_]+'
 
 contexts:
   prototype:
@@ -32,7 +32,7 @@ contexts:
       scope: variable.language.dos-ee-crafting
       set:
         - include: pop-at-eol
-        - match: \b(\w+)\b
+        - match: \b{{identifier}}\b
           scope: string.dos-ee-crafting
           set: on-statement
 
@@ -48,7 +48,7 @@ contexts:
       scope: variable.language.dos-ee-crafting
       set:
         - include: pop-at-eol
-        - match: \b(\w+)\b
+        - match: \b{{identifier}}\b
           scope: string.dos-ee-crafting
           set: with-statement
 
@@ -60,35 +60,75 @@ contexts:
 
   transform:
     - include: pop-at-eol
-    - match: \b{{transform_code}}\b
+    - match: \b(Boost2|Destroy1Boost2)\b
       scope: variable.language.dos-ee-crafting
-      set: transform-parameters
+      push: [req-or-auto-statement, tp-n, tp-n, tp-0, tp-0, tp-w, tp-0, tp-0, tp-0, parameters-statement]
+    - match: \bBoostBoth\b
+      scope: variable.language.dos-ee-crafting
+      push: [req-or-auto-statement, tp-n, tp-n, tp-0, tp-w, tp-w, tp-0, tp-0, tp-0, parameters-statement]
+    - match: \b(Destroy1|DestroyBoth)\b
+      scope: variable.language.dos-ee-crafting
+      push: [req-or-auto-statement, tp-n, tp-n, tp-0, tp-0, tp-0, tp-0, tp-0, tp-0, parameters-statement]
+    - match: \b(Destroy1Transform2|Destroy2Transform1|Transform1|Transform2)\b
+      scope: variable.language.dos-ee-crafting
+      push: [req-or-auto-statement, tp-n, tp-n, tp-0, tp-0, tp-0, tp-0, tp-0, tp-w, parameters-statement]
+    - match: \b(Destroy1Transform2Boost2|Destroy2Transform1Boost1|Transform1Boost1|Transform1Boost2|Transform2Boost2)\b
+      scope: variable.language.dos-ee-crafting
+      push: [req-or-auto-statement, tp-n, tp-n, tp-0, tp-0, tp-w, tp-0, tp-0, tp-w, parameters-statement]
+    - match: \b(Transform1CreateNew|TransformBoth)\b
+      scope: variable.language.dos-ee-crafting
+      push: [req-or-auto-statement, tp-n, tp-n, tp-0, tp-0, tp-0, tp-0, tp-w, tp-w, parameters-statement]
+    - match: \bTransformBothBoost1\b
+      scope: variable.language.dos-ee-crafting
+      push: [req-or-auto-statement, tp-n, tp-n, tp-0, tp-0, tp-w, tp-0, tp-w, tp-w, parameters-statement]
+    - match: \bTransformBothBoostBoth\b
+      scope: variable.language.dos-ee-crafting
+      push: [req-or-auto-statement, tp-n, tp-n, tp-0, tp-w, tp-w, tp-0, tp-w, tp-w, parameters-statement]
+    - match: \bTransformBothCreateAndBoostNew\b
+      scope: variable.language.dos-ee-crafting
+      push: [req-or-auto-statement, tp-n, tp-n, tp-0, tp-0, tp-w, tp-w, tp-w, tp-w, parameters-statement]
+    - match: \bTransformBothCreateNew\b
+      scope: variable.language.dos-ee-crafting
+      push: [req-or-auto-statement, tp-n, tp-n, tp-0, tp-0, tp-0, tp-w, tp-w, tp-w, parameters-statement]
 
-  transform-parameters:
+  tp-w:
+    - match: \b{{identifier}}\b
+      scope: string.dos-ee-crafting
+      pop: true
+
+  tp-0:
+    - match: \b0\b
+      scope: constant.numeric.dos-ee-crafting
+      pop: true
+
+  tp-n:
+    - match: \b[1-9][0-9]*\b
+      scope: constant.numeric.dos-ee-crafting
+      pop: true
+
+  parameters-statement:
     - include: pop-at-eol
     - match: \bparameters\b
       scope: keyword.context.block.dos-ee-crafting
+      pop: true
+
+  req-or-auto-statement:
+    - include: pop-at-eol
+    - match: \brequires\b
+      scope: keyword.context.block.dos-ee-crafting
       set:
         - include: pop-at-eol
-        - match: \b(\S+)\b
-          scope: string.dos-ee-crafting
+        - match: \b(Blackrock|Blacksmithing|Crafting)
+          scope: variable.language.dos-ee-crafting
           set:
             - include: pop-at-eol
-            - match: \brequires\b
-              scope: keyword.context.block.dos-ee-crafting
+            - match: \b\d+\b
+              scope: constant.numeric.dos-ee-crafting
               set:
-                - include: pop-at-eol
-                - match: \b(Blackrock|Blacksmithing|Crafting)
-                  scope: variable.language.dos-ee-crafting
-                  set:
-                    - include: pop-at-eol
-                    - match: \b\d+\b
-                      scope: constant.numeric.dos-ee-crafting
-                      set:
-                        - include: auto-statement
-                          pop: true
-            - include: auto-statement
-              pop: true
+                - include: auto-statement
+                  pop: true
+    - include: auto-statement
+      pop: true
 
   auto-statement:
     - include: pop-at-eol
