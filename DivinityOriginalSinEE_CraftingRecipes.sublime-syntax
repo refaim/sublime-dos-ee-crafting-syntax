@@ -136,7 +136,7 @@ contexts:
       scope: keyword.other.dos-ee-crafting
       set:
         - include: pop-at-eol
-        - match: \b\d+\b
+        - match: \b[0-1]\b
           scope: constant.numeric.dos-ee-crafting
           set:
             - include: pop-at-eol
@@ -144,7 +144,7 @@ contexts:
               scope: keyword.other.dos-ee-crafting
               set:
                 - include: pop-at-eol
-                - match: \b\d+\b
+                - match: \b[0-1]\b
                   scope: constant.numeric.dos-ee-crafting
                   pop: true
 
