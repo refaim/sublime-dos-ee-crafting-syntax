@@ -1,0 +1,105 @@
+%YAML 1.2
+---
+name: Divinity Original Sin Enhanced Edition Crafting Recipes
+file_extensions:
+  - ItemCombos.txt
+scope: source.dos-ee-crafting
+
+variables:
+  entity: '(category|object)'
+  transform_code: '(Boost2|BoostBoth|Destroy1|Destroy1Boost2|Destroy1Transform2|Destroy1Transform2Boost2|Destroy2Transform1|Destroy2Transform1Boost1|DestroyBoth|DoNothing|Transform1|Transform1Boost1|Transform1Boost2|Transform1CreateNew|Transform2|Transform2Boost2|TransformBoth|TransformBothBoost1|TransformBothBoostBoth|TransformBothCreateAndBoostNew|TransformBothCreateNew)'
+
+contexts:
+  prototype:
+    - include: comments
+
+  main:
+    - include: recipe-statements
+
+  pop-at-eol:
+    - match: $\n?
+      pop: true
+
+  recipe-statements:
+    - include: pop-at-eol
+    - match: ^use\b
+      scope: keyword.context.block.dos-ee-crafting
+      push:
+        - include: pop-at-eol
+        - match: \b{{entity}}\b
+          scope: variable.language.dos-ee-crafting
+          set:
+            - include: pop-at-eol
+            - match: \b(\w+)\b
+              scope: string.dos-ee-crafting
+              set:
+                - include: pop-at-eol
+                - match: \bon\b
+                  scope: keyword.context.block.dos-ee-crafting
+                  set:
+                    - include: pop-at-eol
+                    - match: \b{{entity}}\b
+                      scope: variable.language.dos-ee-crafting
+                      set:
+                        - include: pop-at-eol
+                        - match: \b(\w+)\b
+                          scope: string.dos-ee-crafting
+                          set:
+                            - include: pop-at-eol
+                            - match: \b(with transform code)\b
+                              scope: keyword.context.block.dos-ee-crafting
+                              set:
+                                - include: pop-at-eol
+                                - match: \b{{transform_code}}\b
+                                  scope: variable.language.dos-ee-crafting
+                                  set:
+                                    - include: pop-at-eol
+                                    - match: \bparameters\b
+                                      scope: keyword.context.block.dos-ee-carafting
+                                      set:
+                                        # TODO split by types
+                                        - include: pop-at-eol
+                                        - match: \b(\S+)\b
+                                          scope: string.dos-ee-crafting
+                                          set:
+                                            - include: pop-at-eol
+                                            - match: \brequires\b
+                                              scope: keyword.context.block.dos-ee-crafting
+                                              set:
+                                                - include: pop-at-eol
+                                                - match: \b(Blackrock|Blacksmithing|Crafting)
+                                                  scope: variable.language.dos-ee-crafting
+                                                  set:
+                                                    - include: pop-at-eol
+                                                    - match: \b\d+\b
+                                                      scope: constant.numeric.dos-ee-crafting
+                                                      set:
+                                                        - include: auto-statements
+                                                          pop: true
+                                            - include: auto-statements
+                                              pop: true
+
+  auto-statements:
+    - include: pop-at-eol
+    - match: \bautolevel\b
+      scope: keyword.other.dos-ee-crafting
+      set:
+        - include: pop-at-eol
+        - match: \b\d+\b
+          scope: constant.numeric.dos-ee-crafting
+          set:
+            - include: pop-at-eol
+            - match: \bautoValue\b
+              scope: keyword.other.dos-ee-crafting
+              set:
+                - include: pop-at-eol
+                - match: \b\d+\b
+                  scope: constant.numeric.dos-ee-crafting
+                  pop: true
+
+  comments:
+    - match: '//'
+      scope: punctuation.definition.comment.dos-ee-crafting
+      push:
+        - meta_scope: comment.line.double-slash.dos-ee-crafting
+        - include: pop-at-eol
