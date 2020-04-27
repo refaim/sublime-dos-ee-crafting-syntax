@@ -14,72 +14,83 @@ contexts:
     - include: comments
 
   main:
-    - include: recipe-statements
+    - include: use-statements
 
   pop-at-eol:
     - match: $\n?
       pop: true
 
-  recipe-statements:
+  use-statements:
     - include: pop-at-eol
     - match: ^use\b
       scope: keyword.context.block.dos-ee-crafting
-      push:
+      set: first-item
+
+  first-item:
+    - include: pop-at-eol
+    - match: \b{{entity}}\b
+      scope: variable.language.dos-ee-crafting
+      set:
         - include: pop-at-eol
-        - match: \b{{entity}}\b
-          scope: variable.language.dos-ee-crafting
+        - match: \b(\w+)\b
+          scope: string.dos-ee-crafting
+          set: on-statement
+
+  on-statement:
+    - include: pop-at-eol
+    - match: \bon\b
+      scope: keyword.context.block.dos-ee-crafting
+      set: second-item
+
+  second-item:
+    - include: pop-at-eol
+    - match: \b{{entity}}\b
+      scope: variable.language.dos-ee-crafting
+      set:
+        - include: pop-at-eol
+        - match: \b(\w+)\b
+          scope: string.dos-ee-crafting
+          set: with-statement
+
+  with-statement:
+    - include: pop-at-eol
+    - match: \b(with transform code)\b
+      scope: keyword.context.block.dos-ee-crafting
+      set: transform
+
+  transform:
+    - include: pop-at-eol
+    - match: \b{{transform_code}}\b
+      scope: variable.language.dos-ee-crafting
+      set: transform-parameters
+
+  transform-parameters:
+    - include: pop-at-eol
+    - match: \bparameters\b
+      scope: keyword.context.block.dos-ee-crafting
+      set:
+        - include: pop-at-eol
+        - match: \b(\S+)\b
+          scope: string.dos-ee-crafting
           set:
             - include: pop-at-eol
-            - match: \b(\w+)\b
-              scope: string.dos-ee-crafting
+            - match: \brequires\b
+              scope: keyword.context.block.dos-ee-crafting
               set:
                 - include: pop-at-eol
-                - match: \bon\b
-                  scope: keyword.context.block.dos-ee-crafting
+                - match: \b(Blackrock|Blacksmithing|Crafting)
+                  scope: variable.language.dos-ee-crafting
                   set:
                     - include: pop-at-eol
-                    - match: \b{{entity}}\b
-                      scope: variable.language.dos-ee-crafting
+                    - match: \b\d+\b
+                      scope: constant.numeric.dos-ee-crafting
                       set:
-                        - include: pop-at-eol
-                        - match: \b(\w+)\b
-                          scope: string.dos-ee-crafting
-                          set:
-                            - include: pop-at-eol
-                            - match: \b(with transform code)\b
-                              scope: keyword.context.block.dos-ee-crafting
-                              set:
-                                - include: pop-at-eol
-                                - match: \b{{transform_code}}\b
-                                  scope: variable.language.dos-ee-crafting
-                                  set:
-                                    - include: pop-at-eol
-                                    - match: \bparameters\b
-                                      scope: keyword.context.block.dos-ee-carafting
-                                      set:
-                                        # TODO split by types
-                                        - include: pop-at-eol
-                                        - match: \b(\S+)\b
-                                          scope: string.dos-ee-crafting
-                                          set:
-                                            - include: pop-at-eol
-                                            - match: \brequires\b
-                                              scope: keyword.context.block.dos-ee-crafting
-                                              set:
-                                                - include: pop-at-eol
-                                                - match: \b(Blackrock|Blacksmithing|Crafting)
-                                                  scope: variable.language.dos-ee-crafting
-                                                  set:
-                                                    - include: pop-at-eol
-                                                    - match: \b\d+\b
-                                                      scope: constant.numeric.dos-ee-crafting
-                                                      set:
-                                                        - include: auto-statements
-                                                          pop: true
-                                            - include: auto-statements
-                                              pop: true
+                        - include: auto-statement
+                          pop: true
+            - include: auto-statement
+              pop: true
 
-  auto-statements:
+  auto-statement:
     - include: pop-at-eol
     - match: \bautolevel\b
       scope: keyword.other.dos-ee-crafting
